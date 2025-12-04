@@ -1,8 +1,11 @@
 import express, { Request, Response } from "express";
+import { initDB } from "./database/database";
 
 const app = express();
 const PORT = 5000;
 app.use(express.json());
+
+initDB();
 
 app.get("/", (req: Request, res: Response) => {
   res.status(200).json({
