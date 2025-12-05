@@ -21,7 +21,10 @@ const auth = (...roles: ("admin" | "customer")[]) => {
       [decoded.email]
     );
     if (user.rows.length === 0) {
-      throw new Error("User not found!");
+      return res.status(500).json({
+        success: false,
+        message: "User not found",
+      });
     }
     req.user = decoded;
     if (roles.length && !roles.includes(decoded.role)) {
