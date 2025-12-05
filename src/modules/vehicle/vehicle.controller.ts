@@ -75,8 +75,8 @@ const getSingleVehicle = async (req: Request, res: Response) => {
     const result = await vehicleService.getSingleVehicle(vehicleId);
 
     if (result.rows.length === 0) {
-      return res.status(200).json({
-        success: true,
+      return res.status(404).json({
+        success: false,
         message: "No data Found",
         data: result.rows,
       });
@@ -95,8 +95,41 @@ const getSingleVehicle = async (req: Request, res: Response) => {
   }
 };
 
+// update single vehicle
+
+const updateSingleVehicle = async (req: Request, res: Response) => {
+  try {
+    const vehicleId = Number(req.params.vehicleId);
+
+    const result = await vehicleService.updateSingleVehicle(
+      vehicleId,
+      req.body
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No data Found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Vehicle updated successfully",
+      data: result.rows[0],
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+      error: error.message,
+    });
+  }
+};
+
 export const vehicleController = {
   createVehicle,
   getAllVehicle,
   getSingleVehicle,
+  updateSingleVehicle,
 };
