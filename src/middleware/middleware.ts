@@ -8,7 +8,10 @@ const auth = (...roles: ("admin" | "customer")[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     const token = req.headers.authorization;
     if (!token) {
-      throw new Error("You are not authorized");
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden",
+      });
     }
     const decoded = jwt.verify(token, secrect) as JwtPayload;
     const user = await pool.query(
@@ -22,7 +25,10 @@ const auth = (...roles: ("admin" | "customer")[]) => {
     }
     req.user = decoded;
     if (roles.length && !roles.includes(decoded.role)) {
-      throw new Error("Not authorized! Login again ");
+      return res.status(401).json({
+        success: false,
+        message: "Not authorized! Login again",
+      });
     }
     next();
   };
