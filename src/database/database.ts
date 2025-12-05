@@ -22,7 +22,7 @@ export const initDB = async () => {
   //? vehicle data table
 
   await pool.query(`
-        CREATE TABLE IF NOT EXISTS vehicle(
+        CREATE TABLE IF NOT EXISTS vehicles(
         id SERIAL PRIMARY KEY,
         vehicle_name VARCHAR(200) NOT NULL,
         type VARCHAR(20) NOT NULL CHECK (type IN ('car', 'bike', 'van', 'SUV')),

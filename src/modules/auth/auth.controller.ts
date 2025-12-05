@@ -10,6 +10,14 @@ const createUser = async (req: Request, res: Response) => {
         message: "Password must be at least 6 characters",
       });
     }
+
+    const userType = ["admin", "customer"];
+    if (!userType.includes(req.body.role)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid user type",
+      });
+    }
     const result = await authService.createUser(req.body);
     res.status(201).json({
       success: true,
