@@ -11,5 +11,5 @@ router.put(
   auth(Roles.admin, Roles.customer),
   userController.updareUser
 );
-
+router.delete("/:userId", auth(Roles.admin), userController.deleteUser);
 export const userRoute = router;

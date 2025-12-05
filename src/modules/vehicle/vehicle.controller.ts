@@ -154,7 +154,7 @@ const deleteSingleVehicle = async (req: Request, res: Response) => {
   try {
     const vehicleId = Number(req.params.vehicleId);
     const checkVehicle = await pool.query(
-      `SELECT availability_status FROM Vehicles WHERE id = $1`,
+      `SELECT availability_status FROM vehicles WHERE id = $1`,
       [vehicleId]
     );
 

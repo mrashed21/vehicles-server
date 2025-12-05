@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { pool } from "../../database/database";
 import { userSerice } from "./user.service";
 
 // get all user
@@ -71,7 +72,47 @@ const updareUser = async (req: Request, res: Response) => {
   }
 };
 
+// delete user
+const deleteUser = async (req: Request, res: Response) => {
+  try {
+    const userId = Number(req.params.userId);
+
+    const activeBookings = await pool.query(
+      `SELECT id FROM bookings WHERE customer_id = $1 AND status = 'active'`,
+      [userId]
+    );
+
+    if (activeBookings.rows.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot delete user because they have active bookings.",
+      });
+    }
+
+    const result = await userSerice.deleteUser(userId);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "User deleted successfully",
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+      error: error.message,
+    });
+  }
+};
+
 export const userController = {
   getAllUser,
   updareUser,
+  deleteUser,
 };
