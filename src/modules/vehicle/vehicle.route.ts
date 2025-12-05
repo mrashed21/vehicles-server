@@ -12,5 +12,9 @@ router.put(
   auth(Roles.admin),
   vehicleController.updateSingleVehicle
 );
-
+router.delete(
+  "/:vehicleId",
+  auth(Roles.admin),
+  vehicleController.deleteSingleVehicle
+);
 export const vehicleRoute = router;
