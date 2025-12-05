@@ -30,7 +30,7 @@ const loginUser = async (req: Request, res: Response) => {
 
     res.status(200).json({
       success: true,
-      message: "Users get Successfully",
+      message: "Login Successful",
       data: result,
     });
   } catch (error: any) {
