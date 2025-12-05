@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { pool } from "../../database/database";
 import { vehicleService } from "./vehicle.service";
 
 // create vehicle controller
@@ -42,7 +43,6 @@ const createVehicle = async (req: Request, res: Response) => {
 };
 
 // get all vehicle
-
 const getAllVehicle = async (req: Request, res: Response) => {
   try {
     const result = await vehicleService.getAllVehicle();
@@ -68,7 +68,6 @@ const getAllVehicle = async (req: Request, res: Response) => {
 };
 
 // get single vehicle
-
 const getSingleVehicle = async (req: Request, res: Response) => {
   try {
     const vehicleId = Number(req.params.vehicleId);
@@ -96,11 +95,34 @@ const getSingleVehicle = async (req: Request, res: Response) => {
 };
 
 // update single vehicle
-
 const updateSingleVehicle = async (req: Request, res: Response) => {
   try {
-    const vehicleId = Number(req.params.vehicleId);
+    const validTypes = ["car", "bike", "van", "SUV"];
+    if (req.body.type && !validTypes.includes(req.body.type)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid vehicle type",
+      });
+    }
 
+    if (req.body.daily_rent_price && req.body.daily_rent_price <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Rent must be a positive number",
+      });
+    }
+    const availabilityStatus = ["available", "booked"];
+    if (
+      req.body.availability_status &&
+      !availabilityStatus.includes(req.body.availability_status)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid availability status",
+      });
+    }
+
+    const vehicleId = Number(req.params.vehicleId);
     const result = await vehicleService.updateSingleVehicle(
       vehicleId,
       req.body
@@ -131,17 +153,35 @@ const updateSingleVehicle = async (req: Request, res: Response) => {
 const deleteSingleVehicle = async (req: Request, res: Response) => {
   try {
     const vehicleId = Number(req.params.vehicleId);
+    const checkVehicle = await pool.query(
+      `SELECT availability_status FROM Vehicles WHERE id = $1`,
+      [vehicleId]
+    );
 
-    const result = await vehicleService.deleteSingleVehicle(vehicleId);
+    if (checkVehicle.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Vehicle not found!",
+      });
+    }
+
+    if (checkVehicle.rows[0].availability_status === "booking") {
+      return res.status(400).json({
+        success: false,
+        message: "Vehicle is currently booked and cannot be deleted.",
+      });
+    }
+    await vehicleService.deleteSingleVehicle(vehicleId);
 
     return res.status(200).json({
       success: true,
       message: "Vehicle deleted successfully",
     });
   } catch (error: any) {
-    return res.status(error.statusCode || 500).json({
+    return res.status(500).json({
       success: false,
-      message: error.message || "Something went wrong",
+      message: "Something went wrong",
+      error: error.message,
     });
   }
 };
