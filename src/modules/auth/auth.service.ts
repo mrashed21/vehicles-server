@@ -25,7 +25,9 @@ const createUser = async (payload: Record<string, unknown>) => {
 // login user service
 
 const loginUser = async (email: string, password: string) => {
-  const user = await pool.query(`SELECT * FROM users WHERE email=$1`, [email]);
+  const user = await pool.query(`SELECT * FROM users WHERE email=$1`, [
+    (email as string).toLowerCase(),
+  ]);
   if (user.rows.length === 0) {
     throw new Error("User not found!");
   }
@@ -35,13 +37,14 @@ const loginUser = async (email: string, password: string) => {
     throw new Error("Invalid Credential !");
   }
   const jwtPayload = {
+    id: user.rows[0].id,
     name: user.rows[0].name,
     email: user.rows[0].email,
     role: user.rows[0].role,
   };
 
   const token = jwt.sign(jwtPayload, secrect, { expiresIn: "7d" });
-  delete user.rows[0].password
+  delete user.rows[0].password;
   return { token, user: user.rows[0] };
 };
 export const authService = {
