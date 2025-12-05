@@ -1,9 +1,10 @@
 import dotenv from "dotenv";
 import path from "path";
 import { Pool } from "pg";
+import config from "../config";
 dotenv.config({ path: path.join(process.cwd(), ".env") });
 export const pool = new Pool({
-  connectionString: `${process.env.CONNECTION_STR}`,
+  connectionString: `${config.connection_str}`,
 });
 
 export const initDB = async () => {

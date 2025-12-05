@@ -1,9 +1,10 @@
 import express, { Request, Response } from "express";
+import config from "./config";
 import { initDB } from "./database/database";
 import router from "./router/router";
 
 const app = express();
-const PORT = 5000;
+
 app.use(express.json());
 
 initDB();
@@ -19,6 +20,6 @@ app.get("/", (req: Request, res: Response) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`Vehicle Rental System server running at ${PORT}`);
+app.listen(config.port, () => {
+  console.log(`Vehicle Rental System server running at ${config.port}`);
 });

@@ -1,11 +1,9 @@
 import { Request, Response } from "express";
 import { authService } from "./auth.service";
 
-// create user
+// create user controller
 const createUser = async (req: Request, res: Response) => {
-  console.log(req.body);
   try {
-    // name, email, password , phone , role
     const result = await authService.createUser(req.body);
     res.status(201).json({
       success: true,
@@ -21,31 +19,29 @@ const createUser = async (req: Request, res: Response) => {
   }
 };
 
-// get all user
+// login user controller
 
-// const getAllUser = async (req: Request, res: Response) => {
-//   try {
-//     const result = await pool.query(
-//       `INSERT INTO users (name, email, password)
-//        VALUES ($1, $2, $3)
-//        RETURNING *`,
-//       [name, email.toLowerCase(), password]
-//     );
+const loginUser = async (req: Request, res: Response) => {
+  try {
+    const result = await authService.loginUser(
+      req.body.email,
+      req.body.password
+    );
 
-//     res.status(200).json({
-//       success: true,
-//       message: "Users get Successfully",
-//       data: result.rows[0],
-//     });
-//   } catch (error: any) {
-//     res.status(500).json({
-//       success: false,
-//       message: "Something went wrong",
-//       error: error.message,
-//     });
-//   }
-// };
+    res.status(200).json({
+      success: true,
+      message: "Users get Successfully",
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+      error: error.message,
+    });
+  }
+};
 export const authController = {
   createUser,
-  // getAllUser,
+  loginUser,
 };

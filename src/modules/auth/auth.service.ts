@@ -1,6 +1,10 @@
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import config from "../../config";
 import { pool } from "../../database/database";
+const secrect = config.secrect;
 
+// create user service
 const createUser = async (payload: Record<string, unknown>) => {
   const { name, email, password, phone, role } = payload;
 
@@ -18,6 +22,29 @@ const createUser = async (payload: Record<string, unknown>) => {
   return result;
 };
 
+// login user service
+
+const loginUser = async (email: string, password: string) => {
+  const user = await pool.query(`SELECT * FROM users WHERE email=$1`, [email]);
+  if (user.rows.length === 0) {
+    throw new Error("User not found!");
+  }
+  const matchPassowrd = await bcrypt.compare(password, user.rows[0].password);
+
+  if (!matchPassowrd) {
+    throw new Error("Invalid Credential !");
+  }
+  const jwtPayload = {
+    name: user.rows[0].name,
+    email: user.rows[0].email,
+    role: user.rows[0].role,
+  };
+
+  const token = jwt.sign(jwtPayload, secrect, { expiresIn: "7d" });
+  delete user.rows[0].password
+  return { token, user: user.rows[0] };
+};
 export const authService = {
   createUser,
+  loginUser,
 };
