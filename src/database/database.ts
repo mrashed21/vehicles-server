@@ -8,6 +8,7 @@ export const pool = new Pool({
 });
 
 export const initDB = async () => {
+  //? user data table
   await pool.query(`
         CREATE TABLE IF NOT EXISTS users(
         id SERIAL PRIMARY KEY,
@@ -15,10 +16,19 @@ export const initDB = async () => {
         email VARCHAR(150) UNIQUE NOT NULL,
         password TEXT NOT NULL,
         phone VARCHAR(20) NOT NULL,
-        role VARCHAR(100) DEFAULT 'customer',
-        created_at TIMESTAMP DEFAULT NOW(),
-        updated_at TIMESTAMP DEFAULT NOW()
-        )
-        `);
+        role VARCHAR(100) DEFAULT 'customer'
+        )`);
+
+  //? vehicle data table
+
+  await pool.query(`
+        CREATE TABLE IF NOT EXISTS vehicle(
+        id SERIAL PRIMARY KEY,
+        vehicle_name VARCHAR(200) NOT NULL,
+        type VARCHAR(20) NOT NULL CHECK (type IN ('car', 'bike', 'van', 'SUV')),
+        registration_number VARCHAR(150) UNIQUE NOT NULL,
+        daily_rent_price INT NOT NULL,
+        availability_status VARCHAR(20) NOT NULL DEFAULT 'available'
+        )`);
   console.log("Database Connected");
 };
