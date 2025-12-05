@@ -1,11 +1,16 @@
 import express, { Request, Response } from "express";
 import { initDB } from "./database/database";
+import router from "./router/router";
 
 const app = express();
 const PORT = 5000;
 app.use(express.json());
 
 initDB();
+
+app.use("/api/v1", router);
+
+// app.use("/api/v1/users", userRoute);
 
 app.get("/", (req: Request, res: Response) => {
   res.status(200).json({
