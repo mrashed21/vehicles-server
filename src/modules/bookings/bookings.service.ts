@@ -1,6 +1,6 @@
 import { pool } from "../../database/database";
 
-// create boolong service
+// create booking service
 const createBooking = async (payload: Record<string, unknown>) => {
   const {
     customer_id,
