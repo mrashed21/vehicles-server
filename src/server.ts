@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
+import cron from "node-cron";
 import config from "./config";
-import { initDB } from "./database/database";
+import { initDB, pool } from "./database/database";
 import router from "./router/router";
 
 const app = express();
@@ -11,7 +12,24 @@ initDB();
 
 app.use("/api/v1", router);
 
-// app.use("/api/v1/users", userRoute);
+cron.schedule("0 0 * * *", async () => {
+  await pool.query(`
+    UPDATE bookings
+    SET status='returned'
+    WHERE rent_end_date < CURRENT_DATE
+    AND status='active'
+  `);
+
+  await pool.query(`
+    UPDATE vehicles
+    SET availability_status='available'
+    WHERE id IN (
+      SELECT vehicle_id 
+      FROM bookings 
+      WHERE rent_end_date < CURRENT_DATE AND status='returned'
+    )
+  `);
+});
 
 app.get("/", (req: Request, res: Response) => {
   res.status(200).json({

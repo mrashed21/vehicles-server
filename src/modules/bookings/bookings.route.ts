@@ -6,9 +6,22 @@ import { bookingController } from "./bookings.controller";
 const router = Router();
 
 router.post(
-  "/bookings",
+  "/",
   auth(Roles.admin, Roles.customer),
   bookingController.createBooking
 );
+
+router.get(
+  "/",
+  auth(Roles.admin, Roles.customer),
+  bookingController.getBookings
+);
+
+router.put(
+  "/:bookingId",
+  auth(Roles.admin, Roles.customer),
+  bookingController.updateBooking
+);
+
 
 export const bookingRoute = router;
