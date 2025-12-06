@@ -6,34 +6,46 @@ const secrect = config.secrect;
 
 const auth = (...roles: ("admin" | "customer")[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
-    const token = req.headers.authorization;
-    if (!token) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(403).json({
         success: false,
-        message: "Forbidden",
+        message: "Forbidden! No token provided",
       });
     }
-    const decoded = jwt.verify(token, secrect) as JwtPayload;
-    const user = await pool.query(
-      `
-      SELECT * FROM users WHERE email=$1
-      `,
-      [decoded.email]
-    );
-    if (user.rows.length === 0) {
-      return res.status(500).json({
-        success: false,
-        message: "User not found",
-      });
-    }
-    req.user = decoded;
-    if (roles.length && !roles.includes(decoded.role)) {
+
+    const token = authHeader.split(" ")[1] as string;
+
+    try {
+      const decoded = jwt.verify(token, secrect) as JwtPayload;
+
+      const user = await pool.query(`SELECT * FROM users WHERE email=$1`, [
+        decoded.email,
+      ]);
+
+      if (user.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
+      }
+
+      req.user = decoded;
+
+      if (roles.length && !roles.includes(decoded.role)) {
+        return res.status(401).json({
+          success: false,
+          message: "Not authorized!",
+        });
+      }
+
+      next();
+    } catch (error) {
       return res.status(401).json({
         success: false,
-        message: "Not authorized! Login again",
+        message: "Invalid or expired token!",
       });
     }
-    next();
   };
 };
 

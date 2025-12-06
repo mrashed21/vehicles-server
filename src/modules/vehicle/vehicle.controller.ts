@@ -165,7 +165,7 @@ const deleteSingleVehicle = async (req: Request, res: Response) => {
       });
     }
 
-    if (checkVehicle.rows[0].availability_status === "booking") {
+    if (checkVehicle.rows[0].availability_status === "booked") {
       return res.status(400).json({
         success: false,
         message: "Vehicle is currently booked and cannot be deleted.",

@@ -12,7 +12,7 @@ initDB();
 
 app.use("/api/v1", router);
 
-cron.schedule("0 0 * * *", async () => {
+cron.schedule("46 0 * * *", async () => {
   await pool.query(`
     UPDATE bookings
     SET status='returned'

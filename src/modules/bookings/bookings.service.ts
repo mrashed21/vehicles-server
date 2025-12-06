@@ -73,7 +73,6 @@ const getBookings = async (user: any) => {
 
   let params: any[] = [];
 
-  // Customer → see own bookings only
   if (user.role === "customer") {
     query += " WHERE b.customer_id = $1";
     params.push(user.id);
@@ -94,14 +93,11 @@ const updateBooking = async (bookingId: number, status: string, user: any) => {
   }
 
   const booking = bookingResult.rows[0];
-
-  // Customer rules
   if (user.role === "customer") {
     if (user.id !== booking.customer_id) {
       throw new Error("Customers can update only their own bookings");
     }
 
-    // Customer can cancel ONLY BEFORE start date
     const today = new Date();
     const start = new Date(booking.rent_start_date);
 
@@ -110,22 +106,16 @@ const updateBooking = async (bookingId: number, status: string, user: any) => {
     }
 
     if (status !== "cancelled") {
-      throw new Error("Customers can only cancel bookings");
+      throw new Error("Customers can only cancel their bookings");
     }
   }
 
-  // Admin rules
-  if (user.role === "admin") {
-    if (status === "returned") {
-      // Return vehicle
-      await pool.query(
-        `UPDATE vehicles SET availability_status='available' WHERE id=$1`,
-        [booking.vehicle_id]
-      );
-    }
+  if (status === "cancelled" || status === "returned") {
+    await pool.query(
+      `UPDATE vehicles SET availability_status = 'available' WHERE id = $1`,
+      [booking.vehicle_id]
+    );
   }
-
-  // Update booking
   const updatedBooking = await pool.query(
     `UPDATE bookings SET status=$1 WHERE id=$2 RETURNING *`,
     [status, bookingId]
