@@ -23,5 +23,4 @@ router.put(
   bookingController.updateBooking
 );
 
-
 export const bookingRoute = router;
